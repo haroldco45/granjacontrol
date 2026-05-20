@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GranjaControl — 50 Ponedoras</title>
+<meta name="description" content="Sistema de gestión integral para granja de 50 gallinas ponedoras"/>
+<meta name="theme-color" content="#2d5a1b"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="GranjaControl"/>
+<!-- Open Graph -->
+<meta property="og:title" content="GranjaControl — 50 Ponedoras"/>
+<meta property="og:description" content="Control total de tu granja avícola"/>
+<meta property="og:image" content="icons/icon-512.png"/>
+<meta property="og:url" content="https://granja.vibraspositivashm.com"/>
+<meta property="twitter:card" content="summary_large_image"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Oswald:wght@500;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --verde:#2d5a1b;
+  --verde-medio:#3d7a24;
+  --verde-claro:#5a9e35;
+  --verde-bg:#f0f7eb;
+  --amarillo:#f5c800;
+  --amarillo-oscuro:#c9a200;
+  --naranja:#e07b00;
+  --cafe:#8b4513;
+  --blanco:#fff;
+  --gris-claro:#f4f4f4;
+  --gris:#888;
+  --texto:#1a1a1a;
+  --rojo:#c0392b;
+  --azul:#1a6fa0;
+  --sombra:0 4px 20px rgba(0,0,0,.12);
+  --radio:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:'Nunito',sans-serif;background:#e8f2e0;color:var(--texto)}
+body{display:flex;flex-direction:column;overflow-x:hidden}
+
+/* ── TOP BAR ── */
+#topbar{background:var(--verde);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+#topbar .logo{display:flex;align-items:center;gap:8px}
+#topbar .logo span.icon{font-size:26px}
+#topbar .logo h1{font-family:'Oswald',sans-serif;color:#fff;font-size:18px;letter-spacing:.5px;line-height:1}
+#topbar .logo h1 small{display:block;font-size:11px;font-weight:400;opacity:.75;letter-spacing:0;font-family:'Nunito',sans-serif}
+#reloj-bar{color:rgba(255,255,255,.9);font-size:12px;text-align:right;line-height:1.3}
+#reloj-bar #hora-bar{font-weight:800;font-size:15px}
+
+/* ── NAV TABS ── */
+#nav{background:var(--verde-medio);display:flex;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+#nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:0 0 auto;padding:10px 14px;color:rgba(255,255,255,.7);font-size:11.5px;font-weight:700;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:2px;transition:.2s}
+.nav-btn span.ico{font-size:18px}
+.nav-btn.active{color:#fff;border-bottom-color:var(--amarillo)}
+
+/* ── PÁGINAS ── */
+.page{display:none;flex:1;padding:16px;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── CARDS ── */
+.card{background:#fff;border-radius:var(--radio);box-shadow:var(--sombra);padding:16px;margin-bottom:14px}
+.card-title{font-family:'Oswald',sans-serif;font-size:16px;color:var(--verde);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:#fff;border-radius:12px;padding:14px 12px;text-align:center;box-shadow:var(--sombra);border-top:4px solid var(--verde-claro)}
+.kpi.warn{border-top-color:var(--naranja)}
+.kpi.danger{border-top-color:var(--rojo)}
+.kpi.info{border-top-color:var(--azul)}
+.kpi .val{font-size:30px;font-weight:900;color:var(--verde);line-height:1}
+.kpi.warn .val{color:var(--naranja)}
+.kpi.danger .val{color:var(--rojo)}
+.kpi.info .val{color:var(--azul)}
+.kpi .lbl{font-size:11px;color:var(--gris);font-weight:700;margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+
+/* ── FORMULARIOS ── */
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:12px;font-weight:700;color:var(--verde);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:10px 12px;border:2px solid #ddd;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;outline:none;transition:.2s;background:#fafafa}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--verde-claro);background:#fff}
+.form-row textarea{resize:vertical;min-height:70px}
+.form-row .hint{font-size:11px;color:var(--gris);margin-top:3px}
+.form-row.inline{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ── BOTONES ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border-radius:9px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:.2s;touch-action:manipulation}
+.btn-verde{background:var(--verde);color:#fff}
+.btn-verde:active{background:var(--verde-medio)}
+.btn-amarillo{background:var(--amarillo);color:var(--texto)}
+.btn-amarillo:active{background:var(--amarillo-oscuro)}
+.btn-rojo{background:var(--rojo);color:#fff}
+.btn-gris{background:#ddd;color:var(--texto)}
+.btn-full{width:100%;margin-top:4px}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:7px}
+
+/* ── TABLA ── */
+.tabla-wrap{overflow-x:auto;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--verde);color:#fff;padding:9px 10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+tbody tr:nth-child(even){background:#f9f9f9}
+tbody tr:hover{background:#edf7e3}
+tbody td{padding:8px 10px;border-bottom:1px solid #eee;vertical-align:middle}
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge-verde{background:#d4edda;color:#1a6e2e}
+.badge-naranja{background:#ffeacc;color:#8a4000}
+.badge-rojo{background:#fddede;color:#8b0000}
+.badge-azul{background:#d1eaf5;color:#0a4b72}
+.badge-gris{background:#e8e8e8;color:#555}
+
+/* ── ALERTA ── */
+.alerta{padding:10px 14px;border-radius:9px;font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px}
+.alerta-verde{background:#d4edda;color:#1a6e2e;border-left:4px solid #28a745}
+.alerta-naranja{background:#ffeacc;color:#8a4000;border-left:4px solid #f5a623}
+.alerta-rojo{background:#fddede;color:#8b0000;border-left:4px solid #dc3545}
+.alerta-azul{background:#d1eaf5;color:#0a4b72;border-left:4px solid #17a2b8}
+
+/* ── SECCIÓN SUBTÍTULO ── */
+.sec-title{font-size:13px;font-weight:800;color:var(--verde);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;display:flex;align-items:center;gap:5px}
+
+/* ── PROGRESS ── */
+.prog-wrap{background:#e0e0e0;border-radius:20px;height:12px;overflow:hidden;margin:6px 0}
+.prog-fill{height:100%;border-radius:20px;background:var(--verde-claro);transition:width .5s}
+.prog-fill.warn{background:var(--naranja)}
+.prog-fill.danger{background:var(--rojo)}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(30px);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:700;opacity:0;transition:.35s;z-index:9999;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:540px;padding:20px 18px 30px;max-height:90vh;overflow-y:auto;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-family:'Oswald',sans-serif;font-size:18px;color:var(--verde);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+
+/* ── BOTTOM NAV ── */
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex;z-index:100;box-shadow:0 -2px 12px rgba(0,0,0,.1)}
+.bnav-btn{flex:1;padding:8px 4px 10px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--gris);font-size:10px;font-weight:700;transition:.2s}
+.bnav-btn span.ico{font-size:22px}
+.bnav-btn.active{color:var(--verde)}
+.bnav-btn.active .ico{filter:drop-shadow(0 0 4px rgba(45,90,27,.4))}
+
+/* ── SCROLL FIX ── */
+main{padding-bottom:80px}
+
+/* ── CHART BARS ── */
+.barras{display:flex;align-items:flex-end;gap:6px;height:80px;padding-top:8px}
+.barra-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.barra{width:100%;background:var(--verde-claro);border-radius:4px 4px 0 0;transition:height .5s}
+.barra-lbl{font-size:10px;color:var(--gris);font-weight:600}
+.barra-val{font-size:10px;font-weight:800;color:var(--verde)}
+
+/* ── GALERÍA LOTE ── */
+.lote-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.lote-card{background:linear-gradient(135deg,#e8f7df,#f8fff4);border:2px solid #c3e6b0;border-radius:12px;padding:12px;position:relative}
+.lote-card .lote-num{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--verde)}
+.lote-card .lote-info{font-size:11px;color:var(--gris);margin-top:2px}
+.lote-card .lote-estado{position:absolute;top:10px;right:10px}
+
+/* ── SEMAFORO ── */
+.semaforo{width:12px;height:12px;border-radius:50%;display:inline-block}
+.sem-verde{background:#28a745;box-shadow:0 0 6px rgba(40,167,69,.6)}
+.sem-amarillo{background:#ffc107;box-shadow:0 0 6px rgba(255,193,7,.6)}
+.sem-rojo{background:#dc3545;box-shadow:0 0 6px rgba(220,53,69,.6)}
+
+/* ── RESPONSIVE ── */
+@media(min-width:500px){
+  .kpi-grid{grid-template-columns:repeat(4,1fr)}
+  .lote-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">
+    <span class="icon">🐔</span>
+    <h1>GranjaControl<small>50 Ponedoras · Bajo Cauca</small></h1>
+  </div>
+  <div id="reloj-bar">
+    <div id="hora-bar">--:--:--</div>
+    <div id="fecha-bar">-- --- ----</div>
+  </div>
+</div>
+
+<!-- NAV SUB -->
+<div id="nav">
+  <button class="nav-btn active" data-page="dashboard" onclick="navTo('dashboard',this)"><span class="ico">📊</span>Inicio</button>
+  <button class="nav-btn" data-page="produccion" onclick="navTo('produccion',this)"><span class="ico">🥚</span>Producción</button>
+  <button class="nav-btn" data-page="alimentacion" onclick="navTo('alimentacion',this)"><span class="ico">🌾</span>Alimento</button>
+  <button class="nav-btn" data-page="sanidad" onclick="navTo('sanidad',this)"><span class="ico">💉</span>Sanidad</button>
+  <button class="nav-btn" data-page="lotes" onclick="navTo('lotes',this)"><span class="ico">🐣</span>Lotes</button>
+  <button class="nav-btn" data-page="finanzas" onclick="navTo('finanzas',this)"><span class="ico">💰</span>Finanzas</button>
+  <button class="nav-btn" data-page="informes" onclick="navTo('informes',this)"><span class="ico">📋</span>Informes</button>
+</div>
+
+<main>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div id="page-dashboard" class="page active">
+
+  <div id="alertas-top"></div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="val" id="kpi-gallinas">50</div><div class="lbl">Gallinas Activas</div></div>
+    <div class="kpi warn"><div class="val" id="kpi-huevos-hoy">--</div><div class="lbl">Huevos Hoy</div></div>
+    <div class="kpi"><div class="val" id="kpi-postura">--%</div><div class="lbl">% Postura</div></div>
+    <div class="kpi info"><div class="val" id="kpi-alimento">--kg</div><div class="lbl">Alimento Disp.</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📈 Producción últimos 7 días</div>
+    <div class="barras" id="barras-semana"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔔 Estado del galpón</div>
+    <div id="estado-galpon"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚡ Acciones rápidas</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="btn btn-verde" onclick="navTo('produccion'); openModalProduccion()">🥚 Reg. Huevos</button>
+      <button class="btn btn-amarillo" onclick="navTo('alimentacion'); openModalAlimento()">🌾 Reg. Alimento</button>
+      <button class="btn btn-gris" onclick="navTo('sanidad'); openModalSanidad()">💉 Reg. Sanidad</button>
+      <button class="btn" style="background:#4a90d9;color:#fff" onclick="navTo('finanzas'); openModalGasto()">💰 Reg. Gasto</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📅 Próximas tareas</div>
+    <div id="tareas-lista"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════ PRODUCCIÓN ══════════════ -->
+<div id="page-produccion" class="page">
+
+  <div class="card">
+    <div class="card-title">🥚 Registrar producción diaria</div>
+    <div class="form-row inline">
+      <div>
+        <label>Fecha</label>
+        <input type="date" id="prod-fecha"/>
+      </div>
+      <div>
+        <label>Hora</label>
+        <input type="time" id="prod-hora"/>
+      </div>
+    </div>
+    <div class="form-row inline">
+      <div>
+        <label>Huevos recolectados</label>
+        <input type="number" id="prod-huevos" placeholder="Ej: 44" min="0" max="50"/>
+      </div>
+      <div>
+        <label>Rotos / descarte</label>
+        <input type="number" id="prod-rotos" placeholder="0" min="0"/>
+      </div>
+    </div>
+    <div class="form-row inline">
+      <div>
+        <label>Talla (S/M/L/XL)</label>
+        <select id="prod-talla">
+          <option value="">Mixto</option>
+          <option>S – Pequeño</option>
+          <option>M – Mediano</option>
+          <option>L – Grande</option>
+          <option>XL – Extra</option>
+        </select>
+      </div>
+      <div>
+        <label>Destino</label>
+        <select id="prod-destino">
+          <option>Venta directa</option>
+          <option>Tienda / cliente fijo</option>
+          <option>Consumo propio</option>
+          <option>Reservado</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Observaciones</label>
+      <textarea id="prod-obs" placeholder="Novedades, comportamiento del lote..."></textarea>
+    </div>
+    <button class="btn btn-verde btn-full" onclick="guardarProduccion()">💾 Guardar Registro</button>
+  </div>
+
+  <div class="sec-title">📋 Historial de producción</div>
+  <div class="card" style="padding:0 0 4px">
+    <div class="tabla-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Hora</th><th>Huevos</th><th>Rotos</th><th>%Postura</th><th>Destino</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-produccion"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📦 Inventario de huevos</div>
+    <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="kpi"><div class="val" id="inv-total">0</div><div class="lbl">Total disponibles</div></div>
+      <div class="kpi warn"><div class="val" id="inv-mes">0</div><div class="lbl">Este mes</div></div>
+      <div class="kpi info"><div class="val" id="inv-semana">0</div><div class="lbl">Esta semana</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ALIMENTACIÓN ══════════════ -->
+<div id="page-alimentacion" class="page">
+
+  <div class="alerta alerta-azul">
+    ℹ️ Consumo estándar: <strong>4 bolsas × 50 kg/mes</strong> = 200 kg/mes (4 kg/día aprox.)
+  </div>
+
+  <div class="card">
+    <div class="card-title">🌾 Registrar alimento</div>
+    <div class="form-row inline">
+      <div>
+        <label>Fecha</label>
+        <input type="date" id="ali-fecha"/>
+      </div>
+      <div>
+        <label>Hora</label>
+        <input type="time" id="ali-hora"/>
+      </div>
+    </div>
+    <div class="form-row inline">
+      <div>
+        <label>Tipo</label>
+        <select id="ali-tipo">
+          <option>Concentrado ponedoras</option>
+          <option>Maíz molido</option>
+          <option>Soya</option>
+          <option>Calcio / conchilla</option>
+          <option>Suplemento vitamínico</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div>
+        <label>Movimiento</label>
+        <select id="ali-movimiento">
+          <option value="entrada">📥 Compra / entrada</option>
+          <option value="consumo">📤 Suministro / consumo</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row inline">
+      <div>
+        <label>Cantidad (kg)</label>
+        <input type="number" id="ali-cantidad" placeholder="Ej: 50" min="0.1" step="0.1"/>
+      </div>
+      <div>
+        <label>Costo (COP) — si aplica</label>
+        <input type="number" id="ali-costo" placeholder="0"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Proveedor / Nota</label>
+      <input type="text" id="ali-proveedor" placeholder="Nombre de la distribuidora..."/>
+    </div>
+    <button class="btn btn-verde btn-full" onclick="guardarAlimento()">💾 Guardar</button>
+  </div>
+
+  <div class="sec-title">🗄️ Inventario de alimento</div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="val" id="ali-stock">0</div><div class="lbl">kg en bodega</div></div>
+    <div class="kpi info"><div class="val" id="ali-dias">0</div><div class="lbl">Días restantes</div></div>
+    <div class="kpi warn"><div class="val" id="ali-consumo-mes">0</div><div class="lbl">kg consumidos/mes</div></div>
+    <div class="kpi"><div class="val" id="ali-costo-mes">$0</div><div class="lbl">Costo mes</div></div>
+  </div>
+
+  <div id="ali-alerta-stock"></div>
+
+  <div class="sec-title">📋 Historial de alimento</div>
+  <div class="card" style="padding:0 0 4px">
+    <div class="tabla-wrap">
+      <table>
+        <thead><tr><th>Fecha</th><th>Tipo</th><th>Mov.</th><th>Kg</th><th>Costo</th></tr></thead>
+        <tbody id="tabla-alimento"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SANIDAD ══════════════ -->
+<div id="page-sanidad" class="page">
+
+  <div class="card">
+    <div class="card-title">💉 Registrar evento sanitario</div>
+    <div class="form-row inline">
+      <div>
+        <label>Fecha</label>
+        <input type="date" id="san-fecha"/>
+      </div>
+      <div>
+        <label>Hora</label>
+        <input type="time" id="san-hora"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Tipo de evento</label>
+      <select id="san-tipo">
+        <option>Vacunación – Newcastle</option>
+        <option>Vacunación – Gumboro</option>
+        <option>Vacunación – Bronquitis</option>
+        <option>Vacunación – Viruela aviar</option>
+        <option>Desparasitación</option>
+        <option>Tratamiento antibiótico</option>
+        <option>Vitaminas / electrolitos</option>
+        <option>Limpieza y desinfección galpón</option>
+        <option>Mortalidad</option>
+        <option>Revisión veterinaria</option>
+        <option>Otro</option>
+      </select>
+    </div>
+    <div class="form-row inline">
+      <div>
+        <label>Producto / Medicamento</label>
+        <input type="text" id="san-producto" placeholder="Ej: Lasota, Ampicilina..."/>
+      </div>
+      <div>
+        <label>Dosis / Cantidad</label>
+        <input type="text" id="san-dosis" placeholder="Ej: 1 ml/gal agua"/>
+      </div>
+    </div>
+    <div class="form-row inline">
+      <div>
+        <label>Aves afectadas</label>
+        <input type="number" id="san-aves" placeholder="50" min="1" max="50"/>
+      </div>
+      <div>
+        <label>Costo (COP)</label>
+        <input type="number" id="san-costo" placeholder="0"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Observaciones / Síntomas</label>
+      <textarea id="san-obs" placeholder="Describe síntomas o novedades..."></textarea>
+    </div>
+    <div class="form-row">
+      <label>Próxima aplicación</label>
+      <input type="date" id="san-proxima"/>
+      <div class="hint">Deja en blanco si no hay seguimiento programado</div>
+    </div>
+    <button class="btn btn-verde btn-full" onclick="guardarSanidad()">💾 Guardar registro</button>
+  </div>
+
+  <div class="sec-title">📅 Calendario sanitario 2025–2026</div>
+  <div class="card">
+    <div id="calendario-sanitario"></div>
+  </div>
+
+  <div class="sec-title">📋 Historial sanitario</div>
+  <div class="card" style="padding:0 0 4px">
+    <div class="tabla-wrap">
+      <table>
+        <thead><tr><th>Fecha</th><th>Evento</th><th>Producto</th><th>Aves</th><th>Costo</th><th>Próxima</th></tr></thead>
+        <tbody id="tabla-sanidad"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ LOTES ══════════════ -->
+<div id="page-lotes" class="page">
+
+  <div class="card">
+    <div class="card-title">🐣 Registrar / editar lote</div>
+    <div class="form-row inline">
+      <div>
+        <label>ID Lote</label>
+        <input type="text" id="lote-id" placeholder="Ej: L-001"/>
+      </div>
+      <div>
+        <label>Fecha de ingreso</label>
+        <input type="date" id="lote-fecha"/>
+      </div>
+    </div>
+    <div class="form-row inline">
+      <div>
+        <label>Raza / Línea</label>
+        <select id="lote-raza">
+          <option>Hy-Line Brown</option>
+          <option>Lohmann Brown</option>
+          <option>ISA Brown</option>
+          <option>Bovans Brown</option>
+          <option>Otra</option>
+        </select>
+      </div>
+      <div>
+        <label>Cantidad aves</label>
+        <input type="number" id="lote-cantidad" placeholder="50" min="1"/>
+      </div>
+    </div>
+    <div class="form-row inline">
+      <div>
+        <label>Edad al ingreso (semanas)</label>
+        <input type="number" id="lote-edad" placeholder="Ej: 18" min="1"/>
+      </div>
+      <div>
+        <label>Proveedor</label>
+        <input type="text" id="lote-proveedor" placeholder="Nombre del proveedor"/>
+      </div>
+    </div>
+    <div class="form-row inline">
+      <div>
+        <label>Costo por ave (COP)</label>
+        <input type="number" id="lote-costo" placeholder="0"/>
+      </div>
+      <div>
+        <label>Estado</label>
+        <select id="lote-estado">
+          <option value="activo">✅ Activo</option>
+          <option value="descarte">⚠️ En descarte</option>
+          <option value="retirado">❌ Retirado</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Observaciones</label>
+      <textarea id="lote-obs" placeholder="Notas del lote..."></textarea>
+    </div>
+    <button class="btn btn-verde btn-full" onclick="guardarLote()">💾 Guardar lote</button>
+  </div>
+
+  <div class="sec-title">🐔 Lotes registrados</div>
+  <div class="lote-grid" id="lote-grid"></div>
+
+  <div class="sec-title">📊 Mortalidad acumulada</div>
+  <div class="card">
+    <div class="form-row inline">
+      <div>
+        <label>Fecha</label>
+        <input type="date" id="mort-fecha"/>
+      </div>
+      <div>
+        <label>Cant. aves muertas</label>
+        <input type="number" id="mort-cant" placeholder="0" min="1"/>
+      </div>
+    </div>
+    <div class="form-row inline">
+      <div>
+        <label>Causa probable</label>
+        <select id="mort-causa">
+          <option>Desconocida</option>
+          <option>Enfermedad respiratoria</option>
+          <option>Newcastle</option>
+          <option>Coccidiosis</option>
+          <option>Estrés calórico</option>
+          <option>Accidente</option>
+          <option>Vejez</option>
+          <option>Otra</option>
+        </select>
+      </div>
+      <div>
+        <label>Lote</label>
+        <input type="text" id="mort-lote" placeholder="ID lote"/>
+      </div>
+    </div>
+    <button class="btn btn-rojo btn-full" onclick="guardarMortalidad()">⚠️ Registrar mortalidad</button>
+
+    <div id="tabla-mortalidad-wrap" style="margin-top:12px">
+      <table style="width:100%;font-size:13px">
+        <thead><tr><th style="background:var(--rojo)">Fecha</th><th style="background:var(--rojo)">Aves</th><th style="background:var(--rojo)">Causa</th><th style="background:var(--rojo)">Lote</th></tr></thead>
+        <tbody id="tabla-mortalidad"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ FINANZAS ══════════════ -->
+<div id="page-finanzas" class="page">
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="val" id="fin-ingresos">$0</div><div class="lbl">Ingresos mes</div></div>
+    <div class="kpi danger"><div class="val" id="fin-gastos">$0</div><div class="lbl">Gastos mes</div></div>
+    <div class="kpi" id="kpi-util"><div class="val" id="fin-utilidad">$0</div><div class="lbl">Utilidad mes</div></div>
+    <div class="kpi info"><div class="val" id="fin-precio-huevo">$0</div><div class="lbl">$/huevo prom.</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💸 Registrar movimiento</div>
+    <div class="form-row inline">
+      <div>
+        <label>Fecha</label>
+        <input type="date" id="fin-fecha"/>
+      </div>
+      <div>
+        <label>Tipo</label>
+        <select id="fin-tipo">
+          <option value="ingreso">📈 Ingreso</option>
+          <option value="gasto">📉 Gasto</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Concepto</label>
+      <select id="fin-concepto">
+        <optgroup label="Ingresos">
+          <option>Venta huevos</option>
+          <option>Venta gallinas descarte</option>
+          <option>Otro ingreso</option>
+        </optgroup>
+        <optgroup label="Gastos">
+          <option>Compra alimento</option>
+          <option>Medicamentos / vacunas</option>
+          <option>Mano de obra</option>
+          <option>Servicios (agua/luz)</option>
+          <option>Mantenimiento galpón</option>
+          <option>Compra pollitas</option>
+          <option>Embalaje / bandejas</option>
+          <option>Transporte</option>
+          <option>Otro gasto</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="form-row inline">
+      <div>
+        <label>Valor (COP)</label>
+        <input type="number" id="fin-valor" placeholder="0" min="0"/>
+      </div>
+      <div>
+        <label>Cantidad (huevos/unid.)</label>
+        <input type="number" id="fin-cantidad2" placeholder="0" min="0"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Descripción</label>
+      <input type="text" id="fin-desc" placeholder="Detalle del movimiento..."/>
+    </div>
+    <button class="btn btn-verde btn-full" onclick="guardarFinanza()">💾 Guardar movimiento</button>
+  </div>
+
+  <div class="sec-title">📋 Movimientos del mes</div>
+  <div class="card" style="padding:0 0 4px">
+    <div class="tabla-wrap">
+      <table>
+        <thead><tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Valor</th></tr></thead>
+        <tbody id="tabla-finanzas"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 Análisis de rentabilidad</div>
+    <div id="analisis-rentabilidad"></div>
+  </div>
+</div>
+
+<!-- ══════════════ INFORMES ══════════════ -->
+<div id="page-informes" class="page">
+
+  <div class="card">
+    <div class="card-title">📋 Generar informe</div>
+    <div class="form-row">
+      <label>Período</label>
+      <select id="inf-periodo">
+        <option value="semana">Esta semana</option>
+        <option value="mes" selected>Este mes</option>
+        <option value="trimestre">Últimos 3 meses</option>
+        <option value="anio">Este año</option>
+        <option value="todo">Todo el historial</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Tipo de informe</label>
+      <select id="inf-tipo">
+        <option value="general">General (completo)</option>
+        <option value="produccion">Solo producción</option>
+        <option value="financiero">Solo financiero</option>
+        <option value="sanitario">Solo sanitario</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-verde" style="flex:1" onclick="generarInforme()">👁️ Ver informe</button>
+      <button class="btn btn-amarillo" style="flex:1" onclick="exportarCSV()">📥 Exportar CSV</button>
+    </div>
+  </div>
+
+  <div id="informe-contenido"></div>
+
+  <div class="card">
+    <div class="card-title">⚙️ Configuración de la granja</div>
+    <div class="form-row">
+      <label>Nombre del propietario</label>
+      <input type="text" id="cfg-propietario" placeholder="Tu nombre"/>
+    </div>
+    <div class="form-row">
+      <label>Nombre de la granja</label>
+      <input type="text" id="cfg-granja" placeholder="Ej: Granja El Paraíso"/>
+    </div>
+    <div class="form-row">
+      <label>Municipio</label>
+      <input type="text" id="cfg-municipio" placeholder="Ej: Caucasia, Antioquia"/>
+    </div>
+    <div class="form-row">
+      <label>Total gallinas activas</label>
+      <input type="number" id="cfg-gallinas" placeholder="50" min="1"/>
+    </div>
+    <div class="form-row">
+      <label>Precio venta por huevo (COP)</label>
+      <input type="number" id="cfg-precio" placeholder="450"/>
+    </div>
+    <button class="btn btn-verde btn-full" onclick="guardarConfig()">💾 Guardar configuración</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--rojo)">🗑️ Zona de datos</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-gris" style="flex:1;font-size:12px" onclick="exportarJSON()">📦 Backup JSON</button>
+      <button class="btn btn-rojo" style="flex:1;font-size:12px" onclick="limpiarDatos()">⚠️ Limpiar datos</button>
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center;padding:18px">
+    <div style="font-size:20px">🐔</div>
+    <div style="font-size:13px;color:var(--gris);margin-top:4px">Desarrollada por<br><strong style="color:var(--verde)">Vibras Positivas HM</strong><br><span style="font-size:11px">Derechos de Autor Reservados · 2026</span></div>
+  </div>
+</div>
+
+</main>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL GENÉRICO -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-body"></div>
+    <button class="btn btn-gris btn-full" onclick="cerrarModal()" style="margin-top:10px">✕ Cerrar</button>
+  </div>
+</div>
+
+<!-- SERVICE WORKER & MANIFEST links -->
+<script>
+// ══════════════════════════════════════
+//  UTILIDADES COLOMBIA
+// ══════════════════════════════════════
+function getColombia(){
+  return new Date(new Date().toLocaleString('en-US',{timeZone:'America/Bogota'}));
+}
+function fmtFecha(d){
+  const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const dt=new Date(d+'T00:00:00');
+  return `${dt.getDate()} ${meses[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+function fmtMoneda(v){
+  return '$'+Number(v).toLocaleString('es-CO');
+}
+function fechaHoy(){
+  const d=getColombia();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function horaAhora(){
+  const d=getColombia();
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+// ── RELOJ ──
+function actualizarReloj(){
+  const d=getColombia();
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('hora-bar').textContent=
+    `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+  document.getElementById('fecha-bar').textContent=
+    `${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}`;
+}
+setInterval(actualizarReloj,1000);
+actualizarReloj();
+
+// ══════════════════════════════════════
+//  LOCAL STORAGE
+// ══════════════════════════════════════
+function getData(k){try{return JSON.parse(localStorage.getItem('gc_'+k)||'[]')}catch{return[]}}
+function setData(k,v){localStorage.setItem('gc_'+k,JSON.stringify(v))}
+function getConfig(){try{return JSON.parse(localStorage.getItem('gc_config')||'{}')}catch{return{}}}
+function saveConfig(c){localStorage.setItem('gc_config',JSON.stringify(c))}
+
+// ══════════════════════════════════════
+//  NAVEGACIÓN
+// ══════════════════════════════════════
+function navTo(page,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const target=btn||document.querySelector(`[data-page="${page}"]`);
+  if(target)target.classList.add('active');
+  window.scrollTo(0,0);
+  if(page==='dashboard')renderDashboard();
+  if(page==='produccion'){setDateTimeDefaults('prod');renderTablaProduccion();}
+  if(page==='alimentacion'){setDateTimeDefaults('ali');renderTablaAlimento();renderStockAlimento();}
+  if(page==='sanidad'){setDateTimeDefaults('san');renderTablaSanidad();renderCalendarioSanitario();}
+  if(page==='lotes'){setDateTimeDefaults('lote');renderLotes();renderTablaMortalidad();}
+  if(page==='finanzas'){setDateTimeDefaults('fin');renderTablaFinanzas();renderResumenFinanzas();renderAnalisisRentabilidad();}
+  if(page==='informes')cargarConfig();
+}
+
+function setDateTimeDefaults(prefix){
+  const fd=document.getElementById(prefix+'-fecha');
+  const fh=document.getElementById(prefix+'-hora');
+  if(fd&&!fd.value)fd.value=fechaHoy();
+  if(fh&&!fh.value)fh.value=horaAhora();
+}
+
+// ══════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════
+function toast(msg,tipo='verde'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=tipo==='rojo'?'#c0392b':tipo==='naranja'?'#e07b00':'#1a6e2e';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════
+function abrirModal(titulo,html){
+  document.getElementById('modal-title').innerHTML=titulo;
+  document.getElementById('modal-body').innerHTML=html;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function cerrarModal(){document.getElementById('modal-overlay').classList.remove('open')}
+function openModalProduccion(){navTo('produccion')}
+function openModalAlimento(){navTo('alimentacion')}
+function openModalSanidad(){navTo('sanidad')}
+function openModalGasto(){navTo('finanzas')}
+
+// ══════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════
+function renderDashboard(){
+  const cfg=getConfig();
+  const gal=cfg.gallinas||50;
+  const prod=getData('produccion');
+  const hoy=fechaHoy();
+
+  // KPI huevos hoy
+  const regsHoy=prod.filter(r=>r.fecha===hoy);
+  const hueHoy=regsHoy.reduce((s,r)=>s+Number(r.huevos),0);
+  document.getElementById('kpi-gallinas').textContent=gal;
+  document.getElementById('kpi-huevos-hoy').textContent=hueHoy;
+  const pct=gal>0?Math.round((hueHoy/gal)*100):0;
+  document.getElementById('kpi-postura').textContent=pct+'%';
+
+  // alimento stock
+  const ali=getData('alimento');
+  const stockKg=ali.reduce((s,r)=>r.movimiento==='entrada'?s+Number(r.cantidad):s-Number(r.cantidad),0);
+  document.getElementById('kpi-alimento').textContent=Math.max(0,stockKg).toFixed(0)+'kg';
+
+  // barras 7 días
+  const barrasEl=document.getElementById('barras-semana');
+  const ultimos7=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(getColombia());
+    d.setDate(d.getDate()-i);
+    const fd=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const total=prod.filter(r=>r.fecha===fd).reduce((s,r)=>s+Number(r.huevos),0);
+    const dias=['D','L','M','X','J','V','S'];
+    ultimos7.push({dia:dias[d.getDay()],val:total,fecha:fd});
+  }
+  const maxV=Math.max(...ultimos7.map(u=>u.val),1);
+  barrasEl.innerHTML=ultimos7.map(u=>`
+    <div class="barra-item">
+      <div class="barra-val">${u.val}</div>
+      <div class="barra" style="height:${Math.max(4,(u.val/maxV)*60)}px;background:${u.fecha===hoy?'var(--amarillo)':'var(--verde-claro)'}"></div>
+      <div class="barra-lbl">${u.dia}</div>
+    </div>`).join('');
+
+  // estado galpón
+  const alertasEl=document.getElementById('alertas-top');
+  const estadoEl=document.getElementById('estado-galpon');
+  let alertas=[];
+  let estadoItems=[];
+
+  // alimento
+  const dias_ali=stockKg>0?Math.round(stockKg/4):0;
+  if(dias_ali<=3&&stockKg>0){alertas.push({tipo:'rojo',msg:`⚠️ Alimento crítico: solo ${dias_ali} días restantes. ¡Compra urgente!`});}
+  else if(dias_ali<=7){alertas.push({tipo:'naranja',msg:`🌾 Alimento bajo: ${dias_ali} días restantes. Programa compra.`});}
+  estadoItems.push({ico:'🌾',label:'Alimento en bodega',val:`${Math.max(0,stockKg).toFixed(0)} kg (${dias_ali} días)`,sem:dias_ali>7?'verde':dias_ali>3?'amarillo':'rojo'});
+
+  // postura
+  estadoItems.push({ico:'🥚',label:'Postura hoy',val:`${pct}% (${hueHoy} huevos)`,sem:pct>=80?'verde':pct>=60?'amarillo':'rojo'});
+
+  // mortalidad
+  const mort=getData('mortalidad');
+  const mortMes=mort.filter(r=>r.fecha.startsWith(hoy.substring(0,7))).reduce((s,r)=>s+Number(r.cantidad),0);
+  estadoItems.push({ico:'💀',label:'Mortalidad este mes',val:`${mortMes} aves`,sem:mortMes===0?'verde':mortMes<3?'amarillo':'rojo'});
+
+  // sanidad próxima
+  const san=getData('sanidad');
+  const proximas=san.filter(r=>r.proxima&&r.proxima>=hoy).sort((a,b)=>a.proxima.localeCompare(b.proxima));
+  if(proximas.length>0){
+    const p=proximas[0];
+    estadoItems.push({ico:'💉',label:'Próxima sanidad',val:`${fmtFecha(p.proxima)} — ${p.tipo}`,sem:'azul'});
+  }
+
+  alertasEl.innerHTML=alertas.map(a=>`<div class="alerta alerta-${a.tipo}">${a.msg}</div>`).join('');
+  estadoEl.innerHTML=estadoItems.map(i=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee">
+      <span style="font-size:22px">${i.ico}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${i.label}</div>
+        <div style="font-size:12px;color:var(--gris)">${i.val}</div>
+      </div>
+      <span class="semaforo sem-${i.sem}"></span>
+    </div>`).join('');
+
+  // tareas
+  const tareasEl=document.getElementById('tareas-lista');
+  const tareas=[];
+  proximas.forEach(p=>tareas.push({fecha:p.proxima,texto:`💉 ${p.tipo} — ${p.producto||''}`,urgente:p.proxima<=hoy}));
+  if(dias_ali<=7)tareas.push({fecha:hoy,texto:'🌾 Comprar alimento ponedoras',urgente:true});
+  if(tareas.length===0){
+    tareasEl.innerHTML='<div style="text-align:center;padding:12px;color:var(--gris);font-size:13px">✅ Todo al día — sin tareas pendientes</div>';
+  }else{
+    tareasEl.innerHTML=tareas.sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(t=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee">
+        ${t.urgente?'<span class="semaforo sem-rojo"></span>':'<span class="semaforo sem-amarillo"></span>'}
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${t.texto}</div>
+          <div style="font-size:11px;color:var(--gris)">${fmtFecha(t.fecha)}</div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+// ══════════════════════════════════════
+//  PRODUCCIÓN
+// ══════════════════════════════════════
+function guardarProduccion(){
+  const cfg=getConfig();
+  const gal=cfg.gallinas||50;
+  const fecha=document.getElementById('prod-fecha').value;
+  const hora=document.getElementById('prod-hora').value;
+  const huevos=Number(document.getElementById('prod-huevos').value);
+  const rotos=Number(document.getElementById('prod-rotos').value)||0;
+  if(!fecha||!huevos){toast('⚠️ Completa fecha y huevos','naranja');return;}
+  const data=getData('produccion');
+  data.push({
+    id:Date.now(),
+    fecha,hora,huevos,rotos,
+    talla:document.getElementById('prod-talla').value,
+    destino:document.getElementById('prod-destino').value,
+    obs:document.getElementById('prod-obs').value,
+    postura:((huevos/gal)*100).toFixed(1)
+  });
+  setData('produccion',data);
+  document.getElementById('prod-huevos').value='';
+  document.getElementById('prod-rotos').value='';
+  document.getElementById('prod-obs').value='';
+  document.getElementById('prod-hora').value=horaAhora();
+  toast('✅ Producción guardada');
+  renderTablaProduccion();
+  renderInventarioHuevos();
+}
+function renderTablaProduccion(){
+  const data=getData('produccion').slice().reverse();
+  const tbody=document.getElementById('tabla-produccion');
+  if(!tbody)return;
+  if(data.length===0){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gris);padding:16px">Sin registros aún</td></tr>';return;}
+  tbody.innerHTML=data.slice(0,30).map(r=>`<tr>
+    <td>${fmtFecha(r.fecha)}</td>
+    <td>${r.hora||'--'}</td>
+    <td><strong style="color:var(--verde)">${r.huevos}</strong></td>
+    <td>${r.rotos||0}</td>
+    <td><span class="badge ${Number(r.postura)>=80?'badge-verde':Number(r.postura)>=60?'badge-naranja':'badge-rojo'}">${r.postura}%</span></td>
+    <td style="font-size:11px">${r.destino||'--'}</td>
+  </tr>`).join('');
+  renderInventarioHuevos();
+}
+function renderInventarioHuevos(){
+  const data=getData('produccion');
+  const hoy=fechaHoy();
+  const semana=new Date(getColombia());semana.setDate(semana.getDate()-7);
+  const fSemana=`${semana.getFullYear()}-${String(semana.getMonth()+1).padStart(2,'0')}-${String(semana.getDate()).padStart(2,'0')}`;
+  const mes=hoy.substring(0,7);
+  const total=data.reduce((s,r)=>s+Number(r.huevos)-(Number(r.rotos)||0),0);
+  const semana_tot=data.filter(r=>r.fecha>=fSemana).reduce((s,r)=>s+Number(r.huevos),0);
+  const mes_tot=data.filter(r=>r.fecha.startsWith(mes)).reduce((s,r)=>s+Number(r.huevos),0);
+  const inv=document.getElementById('inv-total');
+  const invM=document.getElementById('inv-mes');
+  const invS=document.getElementById('inv-semana');
+  if(inv)inv.textContent=total;
+  if(invM)invM.textContent=mes_tot;
+  if(invS)invS.textContent=semana_tot;
+}
+
+// ══════════════════════════════════════
+//  ALIMENTACIÓN
+// ══════════════════════════════════════
+function guardarAlimento(){
+  const fecha=document.getElementById('ali-fecha').value;
+  const hora=document.getElementById('ali-hora').value;
+  const cantidad=Number(document.getElementById('ali-cantidad').value);
+  const movimiento=document.getElementById('ali-movimiento').value;
+  if(!fecha||!cantidad){toast('⚠️ Fecha y cantidad requeridos','naranja');return;}
+  const data=getData('alimento');
+  data.push({
+    id:Date.now(),
+    fecha,hora,
+    tipo:document.getElementById('ali-tipo').value,
+    movimiento,cantidad,
+    costo:Number(document.getElementById('ali-costo').value)||0,
+    proveedor:document.getElementById('ali-proveedor').value
+  });
+  setData('alimento',data);
+  document.getElementById('ali-cantidad').value='';
+  document.getElementById('ali-costo').value='';
+  document.getElementById('ali-proveedor').value='';
+  document.getElementById('ali-hora').value=horaAhora();
+  toast('✅ Alimento registrado');
+  renderTablaAlimento();
+  renderStockAlimento();
+}
+function renderStockAlimento(){
+  const data=getData('alimento');
+  const hoy=fechaHoy();
+  const mes=hoy.substring(0,7);
+  const stock=data.reduce((s,r)=>r.movimiento==='entrada'?s+Number(r.cantidad):s-Number(r.cantidad),0);
+  const consumoMes=data.filter(r=>r.movimiento==='consumo'&&r.fecha.startsWith(mes)).reduce((s,r)=>s+Number(r.cantidad),0);
+  const costoMes=data.filter(r=>r.movimiento==='entrada'&&r.fecha.startsWith(mes)).reduce((s,r)=>s+Number(r.costo),0);
+  const dias=stock>0?Math.round(stock/4):0;
+  const stEl=document.getElementById('ali-stock');
+  const dEl=document.getElementById('ali-dias');
+  const cmEl=document.getElementById('ali-consumo-mes');
+  const costEl=document.getElementById('ali-costo-mes');
+  if(stEl)stEl.textContent=Math.max(0,stock).toFixed(0);
+  if(dEl)dEl.textContent=dias;
+  if(cmEl)cmEl.textContent=consumoMes.toFixed(0);
+  if(costEl)costEl.textContent=fmtMoneda(costoMes);
+  const alertEl=document.getElementById('ali-alerta-stock');
+  if(alertEl){
+    if(dias<=3&&stock>0)alertEl.innerHTML='<div class="alerta alerta-rojo">🚨 Stock crítico — comprar alimento hoy</div>';
+    else if(dias<=7)alertEl.innerHTML='<div class="alerta alerta-naranja">⚠️ Stock bajo — programar compra pronto</div>';
+    else alertEl.innerHTML='<div class="alerta alerta-verde">✅ Stock de alimento OK</div>';
+  }
+}
+function renderTablaAlimento(){
+  const data=getData('alimento').slice().reverse();
+  const tbody=document.getElementById('tabla-alimento');
+  if(!tbody)return;
+  if(data.length===0){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--gris);padding:16px">Sin registros</td></tr>';return;}
+  tbody.innerHTML=data.slice(0,30).map(r=>`<tr>
+    <td>${fmtFecha(r.fecha)}</td>
+    <td style="font-size:11px">${r.tipo}</td>
+    <td><span class="badge ${r.movimiento==='entrada'?'badge-verde':'badge-naranja'}">${r.movimiento==='entrada'?'📥 Entrada':'📤 Consumo'}</span></td>
+    <td><strong>${r.cantidad} kg</strong></td>
+    <td style="font-size:11px">${r.costo>0?fmtMoneda(r.costo):'--'}</td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════
+//  SANIDAD
+// ══════════════════════════════════════
+function guardarSanidad(){
+  const fecha=document.getElementById('san-fecha').value;
+  const hora=document.getElementById('san-hora').value;
+  if(!fecha){toast('⚠️ Fecha requerida','naranja');return;}
+  const data=getData('sanidad');
+  data.push({
+    id:Date.now(),
+    fecha,hora,
+    tipo:document.getElementById('san-tipo').value,
+    producto:document.getElementById('san-producto').value,
+    dosis:document.getElementById('san-dosis').value,
+    aves:Number(document.getElementById('san-aves').value)||50,
+    costo:Number(document.getElementById('san-costo').value)||0,
+    obs:document.getElementById('san-obs').value,
+    proxima:document.getElementById('san-proxima').value
+  });
+  setData('sanidad',data);
+  ['san-producto','san-dosis','san-costo','san-obs','san-proxima'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('san-hora').value=horaAhora();
+  toast('✅ Registro sanitario guardado');
+  renderTablaSanidad();
+  renderCalendarioSanitario();
+}
+function renderTablaSanidad(){
+  const data=getData('sanidad').slice().reverse();
+  const tbody=document.getElementById('tabla-sanidad');
+  if(!tbody)return;
+  if(data.length===0){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gris);padding:16px">Sin registros</td></tr>';return;}
+  tbody.innerHTML=data.slice(0,30).map(r=>`<tr>
+    <td style="font-size:11px">${fmtFecha(r.fecha)}</td>
+    <td style="font-size:11px">${r.tipo}</td>
+    <td style="font-size:11px">${r.producto||'--'}</td>
+    <td>${r.aves||50}</td>
+    <td style="font-size:11px">${r.costo>0?fmtMoneda(r.costo):'--'}</td>
+    <td style="font-size:11px">${r.proxima?fmtFecha(r.proxima):'--'}</td>
+  </tr>`).join('');
+}
+function renderCalendarioSanitario(){
+  const el=document.getElementById('calendario-sanitario');
+  if(!el)return;
+  const plan=[
+    {semana:'0–4',evento:'Vacuna Marek (incubadora)',tipo:'azul'},
+    {semana:'7–8',evento:'Vacuna Newcastle + Bronquitis',tipo:'verde'},
+    {semana:'10–12',evento:'Vacuna Gumboro',tipo:'verde'},
+    {semana:'14–16',evento:'Refuerzo Newcastle + Bronquitis',tipo:'verde'},
+    {semana:'18–20',evento:'Inicio postura — vitaminas',tipo:'naranja'},
+    {semana:'Mensual',evento:'Desparasitación general',tipo:'naranja'},
+    {semana:'Bimestral',evento:'Limpieza profunda galpón',tipo:'gris'},
+    {semana:'Semestral',evento:'Revisión veterinaria',tipo:'azul'},
+  ];
+  el.innerHTML=`<div class="sec-title" style="margin-top:0">Plan sanitario recomendado</div>`+
+    plan.map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #eee">
+      <span class="badge badge-${p.tipo}" style="min-width:70px;text-align:center">${p.semana}</span>
+      <span style="font-size:13px;flex:1">${p.evento}</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+//  LOTES
+// ══════════════════════════════════════
+function guardarLote(){
+  const id=document.getElementById('lote-id').value.trim();
+  const fecha=document.getElementById('lote-fecha').value;
+  if(!id||!fecha){toast('⚠️ ID y fecha requeridos','naranja');return;}
+  const data=getData('lotes');
+  const idx=data.findIndex(l=>l.id===id);
+  const lote={
+    id,fecha,
+    raza:document.getElementById('lote-raza').value,
+    cantidad:Number(document.getElementById('lote-cantidad').value)||50,
+    edad:Number(document.getElementById('lote-edad').value)||18,
+    proveedor:document.getElementById('lote-proveedor').value,
+    costo:Number(document.getElementById('lote-costo').value)||0,
+    estado:document.getElementById('lote-estado').value,
+    obs:document.getElementById('lote-obs').value
+  };
+  if(idx>=0)data[idx]=lote;else data.push(lote);
+  setData('lotes',data);
+  ['lote-id','lote-proveedor','lote-obs','lote-costo','lote-edad','lote-cantidad'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  toast('✅ Lote guardado');
+  renderLotes();
+}
+function renderLotes(){
+  const data=getData('lotes');
+  const el=document.getElementById('lote-grid');
+  if(!el)return;
+  if(data.length===0){el.innerHTML='<div style="grid-column:span 2;text-align:center;padding:20px;color:var(--gris);font-size:13px">No hay lotes registrados</div>';return;}
+  el.innerHTML=data.map(l=>`
+    <div class="lote-card">
+      <div class="lote-num">${l.id}</div>
+      <div class="lote-info">${l.raza}</div>
+      <div class="lote-info">🐔 ${l.cantidad} aves</div>
+      <div class="lote-info">📅 ${fmtFecha(l.fecha)}</div>
+      <div class="lote-info">⏱️ ${l.edad} sem al ingreso</div>
+      <div class="lote-estado">
+        <span class="badge ${l.estado==='activo'?'badge-verde':l.estado==='descarte'?'badge-naranja':'badge-rojo'}">
+          ${l.estado==='activo'?'✅ Activo':l.estado==='descarte'?'⚠️ Descarte':'❌ Retirado'}
+        </span>
+      </div>
+    </div>`).join('');
+}
+function guardarMortalidad(){
+  const fecha=document.getElementById('mort-fecha').value||fechaHoy();
+  const cant=Number(document.getElementById('mort-cant').value);
+  if(!cant){toast('⚠️ Ingresa cantidad','naranja');return;}
+  const data=getData('mortalidad');
+  data.push({
+    id:Date.now(),fecha,
+    cantidad:cant,
+    causa:document.getElementById('mort-causa').value,
+    lote:document.getElementById('mort-lote').value||'--'
+  });
+  setData('mortalidad',data);
+  // actualizar gallinas config
+  const cfg=getConfig();
+  cfg.gallinas=Math.max(0,(cfg.gallinas||50)-cant);
+  saveConfig(cfg);
+  document.getElementById('mort-cant').value='';
+  toast('⚠️ Mortalidad registrada','naranja');
+  renderTablaMortalidad();
+}
+function renderTablaMortalidad(){
+  const data=getData('mortalidad').slice().reverse();
+  const tbody=document.getElementById('tabla-mortalidad');
+  if(!tbody)return;
+  if(data.length===0){tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gris);padding:10px">Sin mortalidades registradas</td></tr>';return;}
+  tbody.innerHTML=data.map(r=>`<tr>
+    <td style="font-size:12px">${fmtFecha(r.fecha)}</td>
+    <td><strong style="color:var(--rojo)">${r.cantidad}</strong></td>
+    <td style="font-size:11px">${r.causa}</td>
+    <td style="font-size:11px">${r.lote}</td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════
+//  FINANZAS
+// ══════════════════════════════════════
+function guardarFinanza(){
+  const fecha=document.getElementById('fin-fecha').value;
+  const valor=Number(document.getElementById('fin-valor').value);
+  if(!fecha||!valor){toast('⚠️ Fecha y valor requeridos','naranja');return;}
+  const data=getData('finanzas');
+  data.push({
+    id:Date.now(),fecha,
+    tipo:document.getElementById('fin-tipo').value,
+    concepto:document.getElementById('fin-concepto').value,
+    valor,
+    cantidad:Number(document.getElementById('fin-cantidad2').value)||0,
+    desc:document.getElementById('fin-desc').value
+  });
+  setData('finanzas',data);
+  document.getElementById('fin-valor').value='';
+  document.getElementById('fin-cantidad2').value='';
+  document.getElementById('fin-desc').value='';
+  toast('✅ Movimiento registrado');
+  renderTablaFinanzas();
+  renderResumenFinanzas();
+  renderAnalisisRentabilidad();
+}
+function renderTablaFinanzas(){
+  const hoy=fechaHoy();
+  const mes=hoy.substring(0,7);
+  const data=getData('finanzas').filter(r=>r.fecha.startsWith(mes)).slice().reverse();
+  const tbody=document.getElementById('tabla-finanzas');
+  if(!tbody)return;
+  if(data.length===0){tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gris);padding:16px">Sin movimientos este mes</td></tr>';return;}
+  tbody.innerHTML=data.map(r=>`<tr>
+    <td style="font-size:11px">${fmtFecha(r.fecha)}</td>
+    <td><span class="badge ${r.tipo==='ingreso'?'badge-verde':'badge-rojo'}">${r.tipo==='ingreso'?'📈 Ingreso':'📉 Gasto'}</span></td>
+    <td style="font-size:11px">${r.concepto}</td>
+    <td style="font-weight:700;color:${r.tipo==='ingreso'?'var(--verde)':'var(--rojo)'}">${fmtMoneda(r.valor)}</td>
+  </tr>`).join('');
+}
+function renderResumenFinanzas(){
+  const hoy=fechaHoy();
+  const mes=hoy.substring(0,7);
+  const data=getData('finanzas').filter(r=>r.fecha.startsWith(mes));
+  const ingresos=data.filter(r=>r.tipo==='ingreso').reduce((s,r)=>s+r.valor,0);
+  const gastos=data.filter(r=>r.tipo==='gasto').reduce((s,r)=>s+r.valor,0);
+  const util=ingresos-gastos;
+  const prod=getData('produccion').filter(r=>r.fecha.startsWith(mes));
+  const huevesMes=prod.reduce((s,r)=>s+Number(r.huevos),0);
+  const precioProm=huevesMes>0?ingresos/huevesMes:0;
+  const elI=document.getElementById('fin-ingresos');
+  const elG=document.getElementById('fin-gastos');
+  const elU=document.getElementById('fin-utilidad');
+  const elP=document.getElementById('fin-precio-huevo');
+  if(elI)elI.textContent=fmtMoneda(ingresos);
+  if(elG)elG.textContent=fmtMoneda(gastos);
+  if(elU)elU.textContent=fmtMoneda(util);
+  if(elP)elP.textContent=fmtMoneda(Math.round(precioProm));
+  const kpiU=document.getElementById('kpi-util');
+  if(kpiU)kpiU.className='kpi '+(util>=0?'':'danger');
+}
+function renderAnalisisRentabilidad(){
+  const el=document.getElementById('analisis-rentabilidad');
+  if(!el)return;
+  const cfg=getConfig();
+  const precio=cfg.precio||450;
+  const gal=cfg.gallinas||50;
+  const costoMensual=200*650; // 200kg aprox a $650/kg
+  const ingresosEst=gal*0.85*30*precio;
+  const util=ingresosEst-costoMensual;
+  el.innerHTML=`
+    <div style="font-size:12px;color:var(--gris);margin-bottom:10px">Proyección estimada con ${gal} gallinas al ${Math.round(precio/10)*10}/huevo</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;justify-content:space-between;padding:6px;background:#f9f9f9;border-radius:6px">
+        <span style="font-size:13px">📈 Ingresos estimados/mes</span>
+        <strong style="color:var(--verde)">${fmtMoneda(Math.round(ingresosEst))}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px;background:#f9f9f9;border-radius:6px">
+        <span style="font-size:13px">📉 Costos base alimento/mes</span>
+        <strong style="color:var(--rojo)">${fmtMoneda(costoMensual)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px;background:${util>0?'#d4edda':'#fddede'};border-radius:8px">
+        <span style="font-size:14px;font-weight:700">💰 Utilidad bruta estimada</span>
+        <strong style="font-size:16px;color:${util>0?'var(--verde)':'var(--rojo)'}">${fmtMoneda(Math.round(util))}</strong>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════
+//  INFORMES
+// ══════════════════════════════════════
+function generarInforme(){
+  const periodo=document.getElementById('inf-periodo').value;
+  const tipo=document.getElementById('inf-tipo').value;
+  const hoy=fechaHoy();
+  const cfg=getConfig();
+  let desde='';
+  const d=getColombia();
+  if(periodo==='semana'){const dd=new Date(d);dd.setDate(dd.getDate()-7);desde=`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`;}
+  else if(periodo==='mes')desde=hoy.substring(0,7)+'-01';
+  else if(periodo==='trimestre'){const dd=new Date(d);dd.setMonth(dd.getMonth()-3);desde=`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-01`;}
+  else if(periodo==='anio')desde=d.getFullYear()+'-01-01';
+
+  const filtrar=(arr)=>desde?arr.filter(r=>r.fecha>=desde):arr;
+  const prod=filtrar(getData('produccion'));
+  const ali=filtrar(getData('alimento'));
+  const san=filtrar(getData('sanidad'));
+  const fin=filtrar(getData('finanzas'));
+  const mort=filtrar(getData('mortalidad'));
+
+  const totalHuevos=prod.reduce((s,r)=>s+Number(r.huevos),0);
+  const totalRotos=prod.reduce((s,r)=>s+Number(r.rotos||0),0);
+  const avgPostura=prod.length>0?(prod.reduce((s,r)=>s+Number(r.postura),0)/prod.length).toFixed(1):0;
+  const ingresos=fin.filter(r=>r.tipo==='ingreso').reduce((s,r)=>s+r.valor,0);
+  const gastos=fin.filter(r=>r.tipo==='gasto').reduce((s,r)=>s+r.valor,0);
+  const mortTotal=mort.reduce((s,r)=>s+Number(r.cantidad),0);
+  const stockAli=getData('alimento').reduce((s,r)=>r.movimiento==='entrada'?s+Number(r.cantidad):s-Number(r.cantidad),0);
+
+  const ts=getColombia();
+  const fechaInf=`${ts.getDate()}/${ts.getMonth()+1}/${ts.getFullYear()} ${String(ts.getHours()).padStart(2,'0')}:${String(ts.getMinutes()).padStart(2,'0')}`;
+
+  let html=`<div class="card">
+    <div style="background:var(--verde);color:#fff;padding:14px;border-radius:10px;margin-bottom:14px">
+      <div style="font-family:'Oswald',sans-serif;font-size:18px">📋 INFORME DE PRODUCCIÓN</div>
+      <div style="font-size:12px;opacity:.85">${cfg.granja||'Mi Granja'} · ${cfg.propietario||'Propietario'}</div>
+      <div style="font-size:11px;opacity:.7">${cfg.municipio||'Colombia'} · Generado: ${fechaInf}</div>
+    </div>`;
+
+  if(tipo==='general'||tipo==='produccion'){
+    html+=`<div class="sec-title" style="margin-top:0">🥚 Producción</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi"><div class="val">${totalHuevos}</div><div class="lbl">Total huevos</div></div>
+      <div class="kpi warn"><div class="val">${totalRotos}</div><div class="lbl">Descarte</div></div>
+      <div class="kpi"><div class="val">${avgPostura}%</div><div class="lbl">% Postura prom.</div></div>
+    </div>`;
+  }
+  if(tipo==='general'||tipo==='financiero'){
+    html+=`<div class="sec-title">💰 Financiero</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi"><div class="val" style="font-size:18px">${fmtMoneda(ingresos)}</div><div class="lbl">Ingresos</div></div>
+      <div class="kpi danger"><div class="val" style="font-size:18px">${fmtMoneda(gastos)}</div><div class="lbl">Gastos</div></div>
+      <div class="kpi" style="border-top-color:${ingresos-gastos>=0?'var(--verde-claro)':'var(--rojo)'}"><div class="val" style="font-size:18px;color:${ingresos-gastos>=0?'var(--verde)':'var(--rojo)'}">${fmtMoneda(ingresos-gastos)}</div><div class="lbl">Utilidad</div></div>
+    </div>`;
+  }
+  if(tipo==='general'||tipo==='sanitario'){
+    html+=`<div class="sec-title">💉 Sanidad y lotes</div>
+    <div style="display:flex;gap:10px">
+      <div class="kpi" style="flex:1"><div class="val">${san.length}</div><div class="lbl">Eventos sanitarios</div></div>
+      <div class="kpi danger" style="flex:1"><div class="val">${mortTotal}</div><div class="lbl">Mortalidad</div></div>
+      <div class="kpi info" style="flex:1"><div class="val">${Math.max(0,stockAli).toFixed(0)}kg</div><div class="lbl">Alimento disp.</div></div>
+    </div>`;
+  }
+  html+=`<div style="text-align:center;margin-top:14px;font-size:11px;color:var(--gris)">Desarrollada por <strong>Vibras Positivas HM</strong> · Derechos de Autor Reservados</div></div>`;
+
+  document.getElementById('informe-contenido').innerHTML=html;
+  toast('📋 Informe generado');
+}
+
+function exportarCSV(){
+  const prod=getData('produccion');
+  if(prod.length===0){toast('Sin datos para exportar','naranja');return;}
+  let csv='Fecha,Hora,Huevos,Rotos,% Postura,Talla,Destino,Observaciones\n';
+  prod.forEach(r=>{csv+=`${r.fecha},${r.hora||''},${r.huevos},${r.rotos||0},${r.postura}%,${r.talla||''},${r.destino||''},"${r.obs||''}"\n`;});
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`produccion_${fechaHoy()}.csv`;a.click();
+  toast('📥 CSV descargado');
+}
+
+function exportarJSON(){
+  const backup={
+    produccion:getData('produccion'),
+    alimento:getData('alimento'),
+    sanidad:getData('sanidad'),
+    lotes:getData('lotes'),
+    mortalidad:getData('mortalidad'),
+    finanzas:getData('finanzas'),
+    config:getConfig(),
+    exportado:new Date().toISOString()
+  };
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`backup_granja_${fechaHoy()}.json`;a.click();
+  toast('📦 Backup descargado');
+}
+
+function limpiarDatos(){
+  if(!confirm('⚠️ ¿Eliminar TODOS los datos? Esta acción no se puede deshacer.'))return;
+  ['produccion','alimento','sanidad','lotes','mortalidad','finanzas'].forEach(k=>localStorage.removeItem('gc_'+k));
+  toast('🗑️ Datos eliminados','rojo');
+  renderDashboard();
+}
+
+// ══════════════════════════════════════
+//  CONFIGURACIÓN
+// ══════════════════════════════════════
+function cargarConfig(){
+  const cfg=getConfig();
+  const campos={
+    'cfg-propietario':'propietario',
+    'cfg-granja':'granja',
+    'cfg-municipio':'municipio',
+    'cfg-gallinas':'gallinas',
+    'cfg-precio':'precio'
+  };
+  Object.entries(campos).forEach(([id,key])=>{
+    const el=document.getElementById(id);
+    if(el&&cfg[key]!==undefined)el.value=cfg[key];
+  });
+}
+function guardarConfig(){
+  const cfg=getConfig();
+  cfg.propietario=document.getElementById('cfg-propietario').value;
+  cfg.granja=document.getElementById('cfg-granja').value;
+  cfg.municipio=document.getElementById('cfg-municipio').value;
+  cfg.gallinas=Number(document.getElementById('cfg-gallinas').value)||50;
+  cfg.precio=Number(document.getElementById('cfg-precio').value)||450;
+  saveConfig(cfg);
+  toast('✅ Configuración guardada');
+  renderDashboard();
+}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  // Set defaults
+  setDateTimeDefaults('prod');
+  setDateTimeDefaults('ali');
+  setDateTimeDefaults('san');
+  setDateTimeDefaults('mort');
+  setDateTimeDefaults('fin');
+  document.getElementById('mort-fecha').value=fechaHoy();
+  renderDashboard();
+
+  // Datos de ejemplo si no hay nada
+  if(getData('lotes').length===0){
+    const data=getData('lotes');
+    data.push({id:'L-001',fecha:fechaHoy(),raza:'Hy-Line Brown',cantidad:50,edad:18,proveedor:'Avícola Regional',costo:25000,estado:'activo',obs:'Lote inicial del proyecto'});
+    setData('lotes',data);
+  }
+
+  // Service Worker
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').then(()=>console.log('SW registrado')).catch(()=>{});
+  }
+});
+</script>
+</body>
+</html>
